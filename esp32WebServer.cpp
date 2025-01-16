@@ -1,7 +1,7 @@
 #include <WiFi.h>
 
-const char* ssid = "xxxxxxxx";
-const char* password = "xxxxx"; 
+const char* ssid = "xxxxxxxx"; //max is 32 characters
+const char* password = "12345678";  // this has to be 8 character else it resorts to default 
 
 WiFiServer server(80);
 
