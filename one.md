@@ -5,4 +5,5 @@
 * Open the Boards Manager. Go to Tools > Board > Boards Manager… gethe esp32 from Espressif download & DOIT ESP32 DEVKIT1
 
 ## Resourcres:
-    https://randomnerdtutorials.com/esp32-useful-wi-fi-functions-arduino/#hostname
+    https://randomnerdtutorials.com/esp32-useful-wi-fi-functions-arduino
+great place to learn more about your arduino:)
