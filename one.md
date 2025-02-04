@@ -6,4 +6,4 @@
 
 ## Resourcres:
     https://randomnerdtutorials.com/esp32-useful-wi-fi-functions-arduino
-great place to learn more about your arduino:)
+great place to learn more about your arduino :)
