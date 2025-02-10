@@ -19,3 +19,5 @@ void wifi_sniffer_callback(void* buf, wifi_promiscuous_pkt_type_t type) {
 
     Serial.println("-------------------------");
 }
+/*main engine
+continue development from here. still need to revive old laptop an get the better script*/
