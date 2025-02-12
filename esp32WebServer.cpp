@@ -34,8 +34,8 @@ void loop() {
         String request = client.readString();
         Serial.println(request);
 
-      //OH MY COMMANDING WIFE SHE WANTS TO DESTROY MY LIFE : BORIS GARDENER
       /*
+      TO DO
       1: would be to just send a black page telling thje captive portal url ther is no wifi yk you request you dont get the "success" s
       2: or redirect it like so (might add the second option as a pocket knife when i cant reload or outta bullets)
 
@@ -44,6 +44,10 @@ void loop() {
           client.println();
 
           problem is the 302 redirection may not be followed by sone devices
+      3: TRY implementing SPIFF, i dont like how im adding the whole html on this script gotta add it to /spiff 
+      orr
+      3.5: memory card module way better 
+      speaking of memory esp to listen to music :D
       
       
       */
