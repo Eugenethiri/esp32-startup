@@ -24,7 +24,7 @@ void setup(){
 }
 
 void handleClient(WiFiClient client) {
-  Serial.println("New victim trapped");
+  Serial.println("New victim connected");
   String request = client.readString();
   Serial.println(request);
 
