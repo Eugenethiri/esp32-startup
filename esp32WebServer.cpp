@@ -39,7 +39,7 @@ void handleClient(WiFiClient client) {
     client.println();
     client.stop();
     return;
-       }
+        }
 
   if (request.indexOf("GET /portal") >= 0 ||
       request.indexOf("GET /") >= 0
@@ -55,8 +55,7 @@ void handleClient(WiFiClient client) {
     client.println("Location: http://192.168.4.1");
     client.println("Content-Length: 0");
     client.close();
-  }
-
+    }
 
 void logRequest() {
   File logFile = SPIFFS.open("/replace", "a");
@@ -66,9 +65,6 @@ void logRequest() {
   }
   logFile.println(request);
   LogFile.close();
-}
-
-
 }
 
 
@@ -90,7 +86,7 @@ void loop() {
       speaking of memory esp to listen to music :D      
 */
 
-        // Handle captive portal detection accross diffeent devices
+        // rewrite this and do the index.html SPIFF redirection
         if (request.indexOf("generate_204") > 0 || 
             request.indexOf("hotspot-detect.html") > 0 || 
             request.indexOf("ncsi.txt") > 0) {
