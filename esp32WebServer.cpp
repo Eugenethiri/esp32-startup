@@ -1,90 +1,78 @@
 #include <WiFi.h>
-#include <DNSServer.h>
 
 // ;LISTEN UP!!  
-const char* ssid = "xxxxxxxx";  // Max is 32 characters
-const char* password = "12345678";  // Must be at least 8 characters, else it defaults
+const char* ssid = "xxxxxxxx"; //max is 32 characters
+const char* password = "12345678";  // this has to be 8 character else it resorts to default 
 
 WiFiServer server(80);
-DNSServer dnsServer;  // Creates a DNS server instance
 
-void setup() {
+void setup(){
     Serial.begin(115200);
 
     WiFi.mode(WIFI_AP);
-    Serial.print("Setting AP:");
     WiFi.softAP(ssid, password);
-    Serial.print("AP IP address: ");
+
+    Serial.print("Setting up Ap ;D");
+    
+    Serial.println("Ap Setup done ;D ;D ;D");
+    Serial.print("Ap ip address:");
     Serial.println(WiFi.softAPIP());
-
-    dnsServer.start(53, "*", WiFi.softAPIP());  // DNS hijack to port 53, reroutes all queries
-
+    
     server.begin();
-    Serial.println("Server started");
 }
 
-void loop() {
-    dnsServer.processNextRequest();  // Handle DNS requests
+void loop(){
+    WiFiClient client = server.available(); //wait for connection tobe made 2 ap
 
-    WiFiClient client = server.available();
     if (client) {
         Serial.println("New victim connected");
-        String request = client.readString();
-        Serial.println(request);
 
-        // Simulation of dial request
-        if (request.indexOf("generate_204") >= 0 ||
-            request.indexOf("hotspot-detect.html") >= 0 ||
-            request.indexOf("ncsi.txt") >= 0) {
-            client.println("HTTP/1.1 302 Found");
-            client.println("Location: http://192.168.4.1/portal");
-            client.println("Content-Length: 0");
-            client.println();
-            client.stop();
-            return;
+        //wait for request
+        String request = "" ;
+        while (client.available()){
+            char c = client.read();
+            request += c;
         }
+        Serial.print(request);
+        
+   /* Simple HTML to warn any connected users, if it's an open network that is :D, and public networks. Educates incase of evil portal attack
+   to be tested in the public, nxt is the captive portal with this implementation warning
 
-        if (request.indexOf("GET /portal") >= 0 ||
-            request.indexOf("GET /") >= 0) {
-            client.println("HTTP/1.1 302 Found");
-            client.println("Location: http://192.168.4.1");
-            client.println("Content-Length: 0");
-            client.println();
-            client.stop();
-        } else {
-            client.println("HTTP/1.1 302 Found");
-            client.println("Location: http://192.168.4.1");
-            client.println("Content-Length: 0");
-            client.stop(); 
-        }
-        client.println("<html><head><style>");
-        client.println("body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; padding: 20px; }");
-        client.println("h1 { color: red; }");
-        client.println("ul { list-style-type: none; padding: 0; }");
-        client.println("li { margin: 10px 0; }");
-        client.println("strong { color: #444; }");
-        client.println("em { font-style: italic; color: #555; }");
-        client.println("</style></head><body>");
-        client.println("<h1>Warning: Public WiFi is Risky!</h1>");
-        client.println("<p><strong>Security Risks of Using Public WiFi:</strong></p>");
-        client.println("<ul>");
-        client.println("<li><strong>Man-in-the-middle attacks:</strong> Hackers can intercept your communications.</li>");
-        client.println("<li><strong>Data theft:</strong> Personal and sensitive data can be easily stolen.</li>");
-        client.println("<li><strong>Fake networks:</strong> Attackers can set up rogue WiFi hotspots to impersonate legitimate networks.</li>");
-        client.println("<li><strong>Malware:</strong> Connecting to unsecured networks can expose you to malware or ransomware attacks.</li>");
-        client.println("</ul>");
-        client.println("<p><strong>What can you do to stay safe?</strong></p>");
-        client.println("<ul>");
-        client.println("<li>Use a Virtual Private Network (VPN) to encrypt your connection.</li>");
-        client.println("<li>Avoid accessing sensitive information (e.g., banking sites) on public WiFi.</li>");
-        client.println("<li>Verify the authenticity of the WiFi network before connecting.</li>");
-        client.println("<li>Enable two-factor authentication on your online accounts for added security.</li>");
-        client.println("</ul>");
-        client.println("<p><em>Stay Safe, Stay Secure!</em></p>");
-        client.println("<p><mark>Protected by your friendly neighborhood friend TK<sup><3</sup></mark></p>");
-        client.println("</body></html>");
+   Now we send a response to allow the html file 
+    */
+          client.println(R"rawliteral(
+HTTP/1.1 200 OK
+Content-Type: text/html
+Connection: close
 
-        client.stop();
-        Serial.println("Client disconnected");
+<html><head><style>
+body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; padding: 20px; }
+h1 { color: red; }
+ul { list-style-type: none; padding: 0; }
+li { margin: 10px 0; }
+strong { color: #444; }
+em { font-style: italic; color: #555; }
+</style></head><body>
+<h1>Warning: Public WiFi is Risky!</h1>
+<p><strong>Security Risks of Using Public WiFi:</strong></p>
+<ul>
+<li><strong>Man-in-the-middle attacks:</strong> Hackers can intercept your communications.</li>
+<li><strong>Data theft:</strong> Personal and sensitive data can be easily stolen.</li>
+<li><strong>Fake networks:</strong> Attackers can set up rogue WiFi hotspots to impersonate legitimate networks.</li>
+<li><strong>Malware:</strong> Connecting to unsecured networks can expose you to malware or ransomware attacks.</li>
+</ul>
+<p><strong>What can you do to stay safe?</strong></p>
+<ul>
+<li>Use a Virtual Private Network (VPN) to encrypt your connection.</li>
+<li>Avoid accessing sensitive information (e.g., banking sites) on public WiFi.</li>
+<li>Verify the authenticity of the WiFi network before connecting.</li>
+<li>Enable two-factor authentication on your online accounts for added security.</li>
+</ul>
+<p><em>Stay Safe, Stay Secure!</em></p>
+<p><mark> Protected by your friendly neighborhood friend TK<sup><3</sup> </mark></p>
+</body></html>)rawliteral");
+
+        client.stop(); // manually close the connection 
+        Serial.println("Disconnected lil bro");
     }
 }
