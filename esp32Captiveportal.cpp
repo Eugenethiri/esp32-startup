@@ -36,18 +36,18 @@ em { font-style: italic; color: #555; }
 </ul>
 <p><em>Stay Safe, Stay Secure!</em></p>
 <p><mark> Protected by your friendly neighborhood friend TK<sup><3</sup> </mark></p>
-</body></html>)rawliteral");
+</body></html>)rawliteral";
 
 class CaptiveRequestHandler : public AsyncWebHandler {
 public:
   CaptiveRequestHandler(){}
   virtual ~CaptiveRequestHandler() {}
 
-  bool canHandle(AsyncWebServerRequest *request) const override{
+  bool canHandle(AsyncWebServerRequest *request) {
     return true;
   }
 
-  void handleRequest(AsyncWebServerRequest *request) override{
+  void handleRequest(AsyncWebServerRequest *request) {
     request->send_P(200, "text/html", index_html);
   }
 };
