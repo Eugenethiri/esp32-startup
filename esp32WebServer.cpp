@@ -12,9 +12,9 @@ void setup(){
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
 
-    Serial.print("Setting up Ap ;D");
+    Serial.println("Setting up Ap ;D");
     
-    Serial.println("Ap Setup done ;D ;D ;D");
+    Serial.println("Ap Setup done  ;D /n    ;D/n      ;D");
     Serial.print("Ap ip address:");
     Serial.println(WiFi.softAPIP());
     
