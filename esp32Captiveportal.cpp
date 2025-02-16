@@ -1,3 +1,13 @@
+/*
+  To Do 
+  client status handling function "client connected, disconnected etc"
+  https://github.com/CDFER/Captive-Portal-ESP32/blob/main/src/main.cpp   has quite the information and knowledge, learn from him
+  device list that this actually works on currently windows11 is a yes  
+  redbull/whitemonster
+  
+  
+  */
+ 
 #include <DNSServer.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
