@@ -128,4 +128,8 @@ void loop() {
 
     delay(2000);
 }
-//oh my
+/*oh my conclusion: i gotta change the linker to acually make this work. 
+Adding the function just wont help ill teachmyself the esp-idf compilation way to customise the linker 
+be back when im done 
+
+*/
