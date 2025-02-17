@@ -271,3 +271,9 @@ void loop() {
 }
 
 /* reference: some anime gurl online aso chicken space guys 8266 beacon project*/
+
+/*to do:
+add random beacon spam
+   timer
+   maybe i should add a timer to all?
+*/
