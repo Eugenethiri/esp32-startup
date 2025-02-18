@@ -56,3 +56,8 @@ void loop() {
     // All processing happens in the snifferCallback
     delay(1000);
 }
+
+/* to do 
+this only uses probe request, if the client is already connected this wont work. 
+>> add other frames for sniffing the mac address, ssid and other information in the packet 
+*/
