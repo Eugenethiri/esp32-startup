@@ -1,4 +1,4 @@
-// bla bla bla untested v0.0.1
+// bla bla bla unfinished v0.0.1
 
 
 #include "WiFi.h"
@@ -74,7 +74,7 @@ uint8_t beaconPacket[109] = {
   /* 107 - 108 */ 0x00, 0x00
 };
 
-
+//l00p through the 14 chanels might make it 13 coz we arent in Japan with channel 14
 void nextChannel() {
   if (sizeof(channels) > 1) {
     uint8_t ch = channels[channelIndex];
@@ -96,7 +96,7 @@ void randomMac() {
 }
 
 
-// Define the alphanumeric character set to be used @Rando()
+// Define the alphanumeric character set to be used @Random()
 static const char alphanum[] =
     "0123456789"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -116,7 +116,7 @@ String generateRandomSSID(int length) {
     return ssid;
 }
 
-// Number of SSIDs to generate
+// static of SSIDs to generate willl make it dynamic later
 const int numSSIDs = 10;
 
 // Array to store the generated SSIDs
@@ -138,13 +138,87 @@ void printSSIDs() {
 
 void setup() {
     Serial.begin(115200); // Initialize serial communication
-    randomSeed(analogRead(0)); // Seed the random number generator with an analog pin reading
+    randomSeed(analogRead(0)); // Uses the fluctuating analog reading as a seed to ensure unique random sequences.
 
     generateSSIDs(); // Generate the SSIDs
     printSSIDs(); // Print the SSIDs to the Serial Monitor
 }
 
-void loop() {
-    // ill do it later so lazy and tired , will finish with a sober mind main functions are done tho
+void loop() {   
+ // Ill do it later so lazy and tired , will finish with a sober mind main functions are done tho
+  currentTime = millis();
+
+  // send out SSIDs
+  if (currentTime - attackTime > 100) {
+    attackTime = currentTime;
+
+    // temp variables
+    int i = 0;
+    int j = 0;
+    int ssidNum = 1;
+    char tmp;
+    int ssidsLen = strlen_P(ssids);
+    bool sent = false;
+
+    // go to next channel
+    nextChannel();
+
+    while (i < ssidsLen) {
+      // read out next SSID
+      j = 0;
+      do {
+        tmp = pgm_read_byte(ssids + i + j);
+        j++;
+      } while (tmp != '\n' && j <= 32 && i + j < ssidsLen);
+
+      uint8_t ssidLen = j - 1;
+
+      // set MAC address
+      macAddr[5] = ssidNum;
+      ssidNum++;
+
+      // write MAC address into beacon frame
+      memcpy(&beaconPacket[10], macAddr, 6);
+      memcpy(&beaconPacket[16], macAddr, 6);
+
+      // reset SSID
+      memcpy(&beaconPacket[38], emptySSID, 32);
+
+      // write new SSID into beacon frame
+      memcpy_P(&beaconPacket[38], &ssids[i], ssidLen);
+
+      // set channel for beacon frame
+      beaconPacket[82] = wifi_channel;
+
+      // send packet
+      if (appendSpaces) {
+        for (int k = 0; k < 3; k++) {
+          //packetCounter += wifi_send_pkt_freedom(beaconPacket, packetSize, 0) == 0;
+          //Serial.printf("size: %d \n", packetSize);
+          packetCounter += esp_wifi_80211_tx(WIFI_IF_STA, beaconPacket, packetSize, 0) == 0;
+          delay(1);
+        }
+      }
+
+      // remove spaces
+      else {
+        uint16_t tmpPacketSize = (109 - 32) + ssidLen; // calc size
+        uint8_t* tmpPacket = new uint8_t[tmpPacketSize]; // create packet buffer
+        memcpy(&tmpPacket[0], &beaconPacket[0], 37 + ssidLen); // copy first half of packet into buffer
+        tmpPacket[37] = ssidLen; // update SSID length byte
+        memcpy(&tmpPacket[38 + ssidLen], &beaconPacket[70], 39); // copy second half of packet into buffer
+
+        // send packet
+        for (int k = 0; k < 3; k++) {
+          //packetCounter += wifi_send_pkt_freedom(tmpPacket, tmpPacketSize, 0) == 0;
+          packetCounter += esp_wifi_80211_tx(WIFI_IF_STA, tmpPacket, tmpPacketSize, 0) == 0;
+          delay(1);
+        }
+
+        delete tmpPacket; // free memory of allocated buffer
+      }
+
+      i += j;
+   
 }
 
