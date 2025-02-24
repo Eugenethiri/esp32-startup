@@ -91,6 +91,24 @@ void setupServer(){
   });
 }
 
+void setup(){
+  //your other setup stuff...
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Setting up AP Mode");
+  WiFi.mode(WIFI_AP); 
+  WiFi.softAP("youreCook3d2");
+  Serial.print("AP IP address: ");Serial.println(WiFi.softAPIP());
+  Serial.println("Setting up Async WebServer");
+  setupServer();
+  Serial.println("Starting DNS Server");
+  dnsServer.start(53, "*", WiFi.softAPIP());
+  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
+  //more handlers...
+  server.begin();
+  Serial.println("All Done!");
+}
+
 void loop(){
   dnsServer.processNextRequest();
   if(name_received && proficiency_received){
