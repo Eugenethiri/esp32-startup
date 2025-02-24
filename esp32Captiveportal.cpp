@@ -1,3 +1,5 @@
+//Ref: https://iotespresso.com/create-captive-portal-using-esp32/ ;) smart 
+
 /*
   To Do 
   client status handling function "client connected, disconnected etc" done but now i want a counter for victims
