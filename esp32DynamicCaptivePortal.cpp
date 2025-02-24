@@ -1,8 +1,12 @@
 /* issues:
+no initial connection with any devices
+
+no captive portal
+
+research https://github.com/nthnn/DynaConfig/blob/main/src/dynaconfig.cpp >> had a whole new library for this 
 Compiling issue ,for more read>>  https://github.com/me-no-dev/ESPAsyncWebServer/issues/464
 might have to use previous libraries
 
-UNTESTED TILL I GET HOME INTO MY HELLO KITTY PJS AND USE MY ESP
 */
 
 
@@ -66,12 +70,6 @@ void setupServer(){
       request->send_P(200, "text/html", index_html); 
       Serial.println("Client Connected");
   });
-  //handling strays
-  server.onNotFound([](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html);
-    Serial.println("Victim Connected");
-    
-  });
 
   //recive and send information
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
@@ -103,7 +101,7 @@ void setup(){
   Serial.println();
   Serial.println("Setting up AP Mode");
   WiFi.mode(WIFI_AP); 
-  WiFi.softAP("youreCook3d2");
+  WiFi.softAP("youreCook3d2", "12345678");
   Serial.print("AP IP address: ");Serial.println(WiFi.softAPIP());
   Serial.println("Setting up Async WebServer");
   setupServer();
