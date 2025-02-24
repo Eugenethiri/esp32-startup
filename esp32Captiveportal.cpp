@@ -48,6 +48,35 @@ em { font-style: italic; color: #555; }
 <p><mark> Protected by your friendly neighborhood friend TK<sup><3</sup> </mark></p>
 </body></html>)rawliteral";
 
+/* 
+
+** UNDER CONSTRACTION **
+std::vector<String> connectedMACs; // Store MAC addresses
+
+void checkNewClients() {
+    wifi_sta_list_t stationList;
+    esp_wifi_ap_get_sta_list(&stationList); // Get list of connected stations
+
+    for (int i = 0; i < stationList.num; i++) {
+        // Extract MAC address
+        uint8_t *mac = stationList.sta[i].mac;
+        char macStr[18];
+        sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+        String macAddress = String(macStr);
+
+        // Check if it's a new connection
+        if (std::find(connectedMACs.begin(), connectedMACs.end(), macAddress) == connectedMACs.end()) {
+            connectedMACs.push_back(macAddress);
+            Serial.print("Victim Connected: ");
+            Serial.println(macAddress); // Print new MAC address
+        }
+    }
+}
+
+
+*/
+
 class CaptiveRequestHandler : public AsyncWebHandler {
 public:
   CaptiveRequestHandler(){}
