@@ -3,8 +3,8 @@
 /*
   To Do 
   client status handling function "client connected, disconnected etc" done but now i want a counter for victims
-  https://github.com/CDFER/Captive-Portal-ESP32/blob/main/src/main.cpp   has quite the information and knowledge, learn from him
-  device list that this actually works on currently windows11 is a yes  
+  https://github.com/CDFER/Captive-Portal-ESP32/blob/main/src/main.cpp  >> will upgrade to bros later when i get better exp on  platform.ino
+  
     
   */
  
