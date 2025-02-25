@@ -18,7 +18,7 @@ static const char alphanum[] =
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
 
 // Predefined SSID prefix
-const char* prefix = "dynamics47";
+const char* prefix = "K";
 
 // Packet Buffer
 uint8_t packet[128] = { 0x80, 0x00, 0x00, 0x00, // Frame Control, Duration
