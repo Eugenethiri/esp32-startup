@@ -2,13 +2,21 @@
 no initial connection with any devices
 
 no captive portal
-
-basically alot to do. might be the detection of wifi to solve this.
-
 research https://github.com/nthnn/DynaConfig/blob/main/src/dynaconfig.cpp >> had a whole new library for this 
 Compiling issue ,for more read>>  https://github.com/me-no-dev/ESPAsyncWebServer/issues/464
 might have to use previous libraries
 
+error:
+C:/Users/morar/AppData/Local/Arduino15/packages/esp32/tools/esp-x32/2405/bin/../lib/gcc/xtensa-esp-elf/13.2.0/../../../../xtensa-esp-elf/bin/ld.exe: C:\Users\morar\AppData\Local\arduino\cores\304856845982640bb0ab8356b5381a20\core.a(main.cpp.o):(.literal._Z8loopTaskPv+0xc): undefined reference to `setup()'
+C:/Users/morar/AppData/Local/Arduino15/packages/esp32/tools/esp-x32/2405/bin/../lib/gcc/xtensa-esp-elf/13.2.0/../../../../xtensa-esp-elf/bin/ld.exe: C:\Users\morar\AppData\Local\arduino\cores\304856845982640bb0ab8356b5381a20\core.a(main.cpp.o): in function `loopTask(void*)':
+C:\Users\morar\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.1.3\cores\esp32/main.cpp:56:(.text._Z8loopTaskPv+0x1c): undefined reference to `setup()'
+collect2.exe: error: ld returned 1 exit status
+
+exit status 1
+
+Compilation error: exit status 1
+
+ 
 
 this is gonna be annoying :(
 */
