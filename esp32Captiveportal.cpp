@@ -12,6 +12,8 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include "ESPAsyncWebServer.h"
+#include "esp_wifi.h"
+
 
 DNSServer dnsServer;
 AsyncWebServer server(80);
@@ -48,9 +50,6 @@ em { font-style: italic; color: #555; }
 <p><mark> Protected by your friendly neighborhood friend TK<sup><3</sup> </mark></p>
 </body></html>)rawliteral";
 
-/* 
-
-** UNDER CONSTRACTION **
 std::vector<String> connectedMACs; // Store MAC addresses
 
 void checkNewClients() {
@@ -74,9 +73,6 @@ void checkNewClients() {
     }
 }
 
-
-*/
-
 class CaptiveRequestHandler : public AsyncWebHandler {
 public:
   CaptiveRequestHandler(){}
@@ -94,11 +90,11 @@ public:
 void setupServer(){
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send_P(200, "text/html", index_html); 
-      Serial.println("Victim Connected"); 
+      Serial.println("Serving... ( -_•)▄︻デ══━一"); 
   });
   server.onNotFound([](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
-    Serial.println("Victim Connected");
+    Serial.println(" Serving... ( -_•)▄︻デ══━一");
     
   });
 }
@@ -124,4 +120,6 @@ void setup(){
   
 void loop(){
   dnsServer.processNextRequest();
+  checkNewClients();
+  delay(5000);
 }
