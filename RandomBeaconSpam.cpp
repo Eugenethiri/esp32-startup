@@ -1,6 +1,12 @@
-// bla bla bla unfinished v0.0.1
+/* 
+ref:// justcallmekoko
+To do 
+Untested till i get home or whenever i wanna test 
+
+*/
 
 
+//libraries
 #include "WiFi.h"
 
 extern "C"{
@@ -9,216 +15,93 @@ extern "C"{
   esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 }
 
-const uint8_t channels[] = {1, 6, 11};
-const bool wpa2= true;
-const bool appendSpaces = true; //odd but makes the ssid all 32 characters
-char emptySSID[32];
-uint8_t channelIndex = 0;
-uint8_t macAddr[6];
-uint8_t wifi_channel = 1;
-uint32_t currentTime = 0;
-uint32_t packetSize = 0;
-uint32_t packetCounter = 0;
-uint32_t attackTime = 0;
-uint32_t packetRateTime = 0;
-
-// beacon frame definition
-uint8_t beaconPacket[109] = {
-  /*  0 - 3  */ 0x80, 0x00, 0x00, 0x00, // Type/Subtype: managment beacon frame
-  /*  4 - 9  */ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // Destination: broadcast
-  /* 10 - 15 */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Source
-  /* 16 - 21 */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Source
-
-  // Fixed parameters
-  /* 22 - 23 */ 0x00, 0x00, // Fragment & sequence number (will be done by the SDK)
-  /* 24 - 31 */ 0x83, 0x51, 0xf7, 0x8f, 0x0f, 0x00, 0x00, 0x00, // Timestamp
-  /* 32 - 33 */ 0xe8, 0x03, // Interval: 0x64, 0x00 => every 100ms - 0xe8, 0x03 => every 1s
-  /* 34 - 35 */ 0x31, 0x00, // capabilities Tnformation
-
-  // Tagged parameters
-
-  // SSID parameters
-  /* 36 - 37 */ 0x00, 0x20, // Tag: Set SSID length, Tag length: 32
-  /* 38 - 69 */ 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, // SSID
-
-  // Supported Rates
-  /* 70 - 71 */ 0x01, 0x08, // Tag: Supported Rates, Tag length: 8
-  /* 72 */ 0x82, // 1(B)
-  /* 73 */ 0x84, // 2(B)
-  /* 74 */ 0x8b, // 5.5(B)
-  /* 75 */ 0x96, // 11(B)
-  /* 76 */ 0x24, // 18
-  /* 77 */ 0x30, // 24
-  /* 78 */ 0x48, // 36
-  /* 79 */ 0x6c, // 54
-
-  // Current Channel
-  /* 80 - 81 */ 0x03, 0x01, // Channel set, length
-  /* 82 */      0x01,       // Current Channel
-
-  // RSN information
-  /*  83 -  84 */ 0x30, 0x18,
-  /*  85 -  86 */ 0x01, 0x00,
-  /*  87 -  90 */ 0x00, 0x0f, 0xac, 0x02,
-  /*  91 -  92 */ 0x02, 0x00,
-  /*  93 - 100 */ 0x00, 0x0f, 0xac, 0x04, 0x00, 0x0f, 0xac, 0x04, /*Fix: changed 0x02(TKIP) to 0x04(CCMP) is default. WPA2 with TKIP not supported by many devices*/
-  /* 101 - 102 */ 0x01, 0x00,
-  /* 103 - 106 */ 0x00, 0x0f, 0xac, 0x02,
-  /* 107 - 108 */ 0x00, 0x00
-};
-
-//l00p through the 14 chanels might make it 13 coz we arent in Japan with channel 14
-void nextChannel() {
-  if (sizeof(channels) > 1) {
-    uint8_t ch = channels[channelIndex];
-    channelIndex++;
-    if (channelIndex > sizeof(channels)) channelIndex = 0;
-
-    if (ch != wifi_channel && ch >= 1 && ch <= 14) {
-      wifi_channel = ch;
-      //wifi_set_channel(wifi_channel);
-      esp_wifi_set_channel(wifi_channel, WIFI_SECOND_CHAN_NONE);
-    }
-  }
-}
-
-// generates random MAC
-void randomMac() {
-  for (int i = 0; i < 6; i++)
-    macAddr[i] = random(256);
-}
-
-
-// Define the alphanumeric character set to be used @Random()
 static const char alphanum[] =
-    "0123456789"
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz";
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
 
-// Function to generate a random SSID of a given length
-String generateRandomSSID(int length) {
-  //sets a cap onto the length if user exceeds it
-    if (length > 32) {
-        length = 32;
+//beacon frame
+
+uint8_t my_packet[128] = { 0x80, 0x00, 0x00, 0x00, 
+                /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+                /*10*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                /*16*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 
+                /*22*/  0xc0, 0x6c, 
+                /*24*/  0x83, 0x51, 0xf7, 0x8f, 0x0f, 0x00, 0x00, 0x00, 
+                /*32*/  0x64, 0x00, 
+                /*34*/  0x01, 0x04, 
+                /* SSID */
+                /*36*/  0x00, 0x12, 0x72, 0x72, 0x72, 0x72, 0x72, 0x5f, 0x52, 0x65, 0x64, 0x54, 0x65, 0x61, 0x6d, 0x5f, 0x46, 0x61, 0x6b, 0x65,
+                        0x01, 0x08, 0x82, 0x84,
+                        0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c, 0x03, 0x01, 
+                /*56*/  0x04};                       
+
+// barebones packet
+uint8_t packet[128] = { 0x80, 0x00, 0x00, 0x00, //Frame Control, Duration
+                /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, //Destination address 
+                /*10*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //Source address - overwritten later
+                /*16*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //BSSID - overwritten to the same as the source address
+                /*22*/  0xc0, 0x6c, //Seq-ctl
+                /*24*/  0x83, 0x51, 0xf7, 0x8f, 0x0f, 0x00, 0x00, 0x00, //timestamp - the number of microseconds the AP has been active
+                /*32*/  0x64, 0x00, //Beacon interval
+                /*34*/  0x01, 0x04, //Capability info
+                /* SSID */
+                /*36*/  0x00
+                };
+
+void setup(){
+  Serial.begin(115200); //baudrate
+  Serial.setTimeout(100);
+  Serial.println("PREPARING THE STUFF( -_•) ▄︻デ══━一💥");
+  WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(82);
+
+void broadcastSSID() {
+    int result;
+    
+    // Select a random channel and set it
+    channel = random(1, 13);
+    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+    delay(100);  // Check if this delay is needed or can be reduced/eliminated
+
+    // Randomize SRC MAC using a loop (applies to both sets of addresses)
+    for (int i = 0; i < 6; i++) {
+        uint8_t rnd = random(256);
+        packet[10 + i] = rnd;
+        packet[16 + i] = rnd;
     }
-    String ssid = "";
-    for (int i = 0; i < length; i++) {
-        int randomIndex = random(0, sizeof(alphanum) - 2); // Pick a random index (exclude null terminator)
-        ssid += alphanum[randomIndex]; // Append the character to the SSID
+
+    // Generate a random length for the SSID prefix
+    int prefixLenRandom = random(6, 10);  // random length between 6 and 9 bytes
+    int tagLen = strlen(prefix);           // length of your fixed tag
+    int fullSSIDLen = prefixLenRandom + tagLen;
+    packet[37] = fullSSIDLen;
+
+    // Insert the random prefix (using loop)
+    for (int i = 0; i < prefixLenRandom; i++) {
+        packet[38 + i] = alfa[random(65)];
     }
-    return ssid;
-}
+    // Insert the fixed tag (using memcpy)
+    memcpy(&packet[38 + prefixLenRandom], prefix, tagLen);
 
-// static of SSIDs to generate willl make it dynamic later
-const int numSSIDs = 10;
+    // Insert the channel in the proper location
+    packet[50 + fullSSIDLen] = channel;
 
-// Array to store the generated SSIDs
-String ssidArray[numSSIDs];
+    // Append the post-SSID data (note: original array is 13 bytes but only 12 bytes were copied)
+    const uint8_t postSSID[12] = {
+        0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c,
+        0x03, 0x01  // copying 12 bytes; if 13 is needed, adjust accordingly
+    };
+    memcpy(&packet[38 + fullSSIDLen], postSSID, sizeof(postSSID));
 
-// Function to generate and store SSIDs
-void generateSSIDs() {
-    for (int i = 0; i < numSSIDs; i++) {
-        ssidArray[i] = generateRandomSSID(10); // Generate a 10-character SSID later on a more dynamic one who knows
+    // Transmit the packet 5 times in a loop
+    for (int i = 0; i < 5; i++) {
+        result = esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+        // Optionally, check 'result' for errors here
     }
 }
 
-// Function to print the generated SSIDs
-void printSSIDs() {
-    for (int i = 0; i < numSSIDs; i++) {
-        Serial.println(ssidArray[i]); // Print each SSID to the Serial Monitor
-    }
-}
-
-void setup() {
-    Serial.begin(115200); // Initialize serial communication
-    randomSeed(analogRead(0)); // Uses the fluctuating analog reading as a seed to ensure unique random sequences.
-
-    generateSSIDs(); // Generate the SSIDs
-    printSSIDs(); // Print the SSIDs to the Serial Monitor
-}
-
-void loop() {   
- // Ill do it later so lazy and tired , will finish with a sober mind main functions are done tho
-  currentTime = millis();
-
-  // send out SSIDs
-  if (currentTime - attackTime > 100) {
-    attackTime = currentTime;
-
-    // temp variables
-    int i = 0;
-    int j = 0;
-    int ssidNum = 1;
-    char tmp;
-    int ssidsLen = strlen_P(ssids);
-    bool sent = false;
-
-    // go to next channel
-    nextChannel();
-
-    while (i < ssidsLen) {
-      // read out next SSID
-      j = 0;
-      do {
-        tmp = pgm_read_byte(ssids + i + j);
-        j++;
-      } while (tmp != '\n' && j <= 32 && i + j < ssidsLen);
-
-      uint8_t ssidLen = j - 1;
-
-      // set MAC address
-      macAddr[5] = ssidNum;
-      ssidNum++;
-
-      // write MAC address into beacon frame
-      memcpy(&beaconPacket[10], macAddr, 6);
-      memcpy(&beaconPacket[16], macAddr, 6);
-
-      // reset SSID
-      memcpy(&beaconPacket[38], emptySSID, 32);
-
-      // write new SSID into beacon frame
-      memcpy_P(&beaconPacket[38], &ssids[i], ssidLen);
-
-      // set channel for beacon frame
-      beaconPacket[82] = wifi_channel;
-
-      // send packet
-      if (appendSpaces) {
-        for (int k = 0; k < 3; k++) {
-          //packetCounter += wifi_send_pkt_freedom(beaconPacket, packetSize, 0) == 0;
-          //Serial.printf("size: %d \n", packetSize);
-          packetCounter += esp_wifi_80211_tx(WIFI_IF_STA, beaconPacket, packetSize, 0) == 0;
-          delay(1);
-        }
-      }
-
-      // remove spaces
-      else {
-        uint16_t tmpPacketSize = (109 - 32) + ssidLen; // calc size
-        uint8_t* tmpPacket = new uint8_t[tmpPacketSize]; // create packet buffer
-        memcpy(&tmpPacket[0], &beaconPacket[0], 37 + ssidLen); // copy first half of packet into buffer
-        tmpPacket[37] = ssidLen; // update SSID length byte
-        memcpy(&tmpPacket[38 + ssidLen], &beaconPacket[70], 39); // copy second half of packet into buffer
-
-        // send packet
-        for (int k = 0; k < 3; k++) {
-          //packetCounter += wifi_send_pkt_freedom(tmpPacket, tmpPacketSize, 0) == 0;
-          packetCounter += esp_wifi_80211_tx(WIFI_IF_STA, tmpPacket, tmpPacketSize, 0) == 0;
-          delay(1);
-        }
-
-        delete tmpPacket; // free memory of allocated buffer
-      }
-
-      i += j;
-   
-}
-
+void loop(){
+  broadcastSSID()
+  delay(1);
+  
+} 
