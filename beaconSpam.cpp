@@ -166,7 +166,8 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   //say hi
-  Serial.println("Hello,NodeMCU!");
+  Serial.println("Hello,User! 🗡 🗡 🗡 🗡 🗡");
+  Serial.println("⛧° 。 ⋆༺♱༻⋆ 。°⛧")
   //change WiFi mode
   WiFi.mode(WIFI_MODE_STA);
 
