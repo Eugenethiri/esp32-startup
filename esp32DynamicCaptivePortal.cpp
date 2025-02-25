@@ -8,7 +8,17 @@ basically alot to do. might be the detection of wifi to solve this.
 research https://github.com/nthnn/DynaConfig/blob/main/src/dynaconfig.cpp >> had a whole new library for this 
 Compiling issue ,for more read>>  https://github.com/me-no-dev/ESPAsyncWebServer/issues/464
 might have to use previous libraries
+OG COMPILATION ERROR >> C:\Users\MAMAKO\Documents\Arduino\webWArnning\webWArnning.ino:80:6: error: redefinition of 'void setupServer()'
+   80 | void setupServer(){
+      |      ^~~~~~~~~~~
+C:\Users\MAMAKO\Documents\Arduino\webWArnning\webWArnning.ino:51:6: note: 'void setupServer()' previously defined here
+   51 | void setupServer(){
+      |      ^~~~~~~~~~~
 
+exit status 1
+Compilation error: redefinition of 'void setupServer()'
+
+this is gonna be annoying :(
 */
 
 
