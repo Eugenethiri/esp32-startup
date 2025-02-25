@@ -3,6 +3,8 @@ no initial connection with any devices
 
 no captive portal
 
+basically alot to do. might be the detection of wifi to solve this.
+
 research https://github.com/nthnn/DynaConfig/blob/main/src/dynaconfig.cpp >> had a whole new library for this 
 Compiling issue ,for more read>>  https://github.com/me-no-dev/ESPAsyncWebServer/issues/464
 might have to use previous libraries
