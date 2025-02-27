@@ -1,3 +1,10 @@
+/*
+probe scanner
+
+doent work after users connect to an ap, need to expand on the packets sniffed
+
+*/
+
 #include "WiFi.h"
 #include "esp_wifi.h"
 
