@@ -1,5 +1,3 @@
-//Untested till i get home
-
 #include <BLEDevice.h> //Handle ble clients aswell as set up the server, basically setting up the ble stack, main controller for ble operations
 #include <BLEUtils.h> // Handle ble operations, need to get more practical with this to understand it better
 #include <BLEScan.h> // Set of tools for managing scnanning functions 
@@ -41,8 +39,8 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting BLE Scanner...");
-    Serial.print("▄︻デ══━一 ")
-    Serial.println("⌖ ⌖ ⌖ ⌖ ⌖ ⌖ ⌖ ⌖")
+    Serial.print("▄︻デ══━一 ");
+    Serial.println("⌖ ⌖ ⌖ ⌖ ⌖ ⌖ ⌖ ⌖");
 
     // Initialize BLE
     BLEDevice::init("ESP32_BLE_Sniffer"); //not sure, clever guess this is the UUID
@@ -61,7 +59,7 @@ void setup() {
 void loop() {
     Serial.println("Scanning...");
     BLEScan* pBLEScan = BLEDevice::getScan();
-    BLEScanResults results = pBLEScan->start(scanTime, false);
+    BLEScanResults results = *pBLEScan->start(scanTime, false);
     
     Serial.print("Devices Found: ");
     Serial.println(results.getCount());
