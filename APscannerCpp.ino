@@ -13,7 +13,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("scan start ");
   Serial.println("   ⋆༺𓆩☠︎︎𓆪༻⋆");
-  Serial.println(" ")
+  Serial.println(" ");
   int n = WiFi.scanNetworks();
   Serial.println("scan done");
   if (n==0){
