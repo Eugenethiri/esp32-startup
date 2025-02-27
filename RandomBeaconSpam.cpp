@@ -1,6 +1,10 @@
 /* 
 ref:// https://github.com/justcallmekoko/ESP32BeaconSpam/blob/master/ESP32BeaconSpam.ino#L15
 
+To do :
+increase beacon output 
+give feedback
+
 */
 
 // Libraries
