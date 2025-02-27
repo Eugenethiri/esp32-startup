@@ -1,7 +1,6 @@
 /* 
 ref:// https://github.com/justcallmekoko/ESP32BeaconSpam/blob/master/ESP32BeaconSpam.ino#L15
-To do 
-Untested till i get home or whenever i wanna test 
+
 */
 
 // Libraries
