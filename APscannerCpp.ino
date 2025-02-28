@@ -1,5 +1,17 @@
-//scanner
+//ΛPscanner
 #include "WiFi.h"
+
+//define the auth types WiFi use
+const char* wifi_auth_types[] = {
+
+      "**[0PEN N3TWORK]**",
+      "**[WEP PROTECTION] ULTRA W3AK**",
+      "**[WPA PROTECTION]**",
+      "**[WPA2 PR0TECTI0N]**",
+      "**[WPA/WPA2 PR0TECTION]**",
+      "**[WPA2-3NTERPRISE PROTECTION]**",
+      "**[WPA3 PROTECTION]**"
+      };
 
 void setup() {
   // put your setup code here, to run once:
@@ -12,62 +24,34 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("scan start ");
-  Serial.println("   ⋆༺𓆩☠︎︎𓆪༻⋆");
-  Serial.println(" ");
-  int n = WiFi.scanNetworks();
+  Serial.println("   ⋆༺𓆩☠︎︎𓆪༻⋆ \n");
+  
+  int n = WiFi.scanNetworks(); // we cant use this to discover hidden networks hence the if statement is useless, i wonder how to scan for hidden networks? listen to prob requests ? 
   Serial.println("scan done");
+  
   if (n==0){
     Serial.println("no networks found");
-  } else {
-    Serial.print(n);
-    Serial.println(" networks found.");
-    for (int i = 0; i<n; ++i){
-      Serial.print(i + 1);
-      Serial.print(": ");
-      Serial.print(WiFi.SSID(i));
-      Serial.print(" | MAC address: ");
-      Serial.print(WiFi.BSSIDstr(i));
-      Serial.print(" | AP STRENGTH: ");
-      Serial.print("(");
-      Serial.print(WiFi.RSSI(i));
-      Serial.print(") | ");
-      Serial.print("Channel: ");
-      Serial.print(WiFi.channel(i));
-      Serial.print(" | "); //more organised 
-
-      if (WiFi.SSID(i).length() == 0 ) {
-        Serial.print("  ++HIDDEN SSID++");
-       }
-
-      switch (WiFi.encryptionType(i)){
-          case WIFI_AUTH_OPEN:
-              Serial.println("**[0PEN N3TWORK]**");
-              break;
-          case WIFI_AUTH_WEP:
-              Serial.println("**[WEP PROTECTION] ULTRA W3AK**");
-              break;
-          case WIFI_AUTH_WPA_PSK:
-              Serial.println("**[WPA PROTECTION]**");
-              break;
-          case WIFI_AUTH_WPA2_PSK:
-              Serial.println("**[WPA2 PR0TECTI0N]**");
-              break;
-          case WIFI_AUTH_WPA_WPA2_PSK:
-              Serial.println("**[WPA/WPA2 PR0TECTION]**");
-              break;
-          case WIFI_AUTH_WPA2_ENTERPRISE:
-             Serial.println("**[WPA2-3NTERPRISE PROTECTION]**");
-             break;
-          case WIFI_AUTH_WPA3_PSK:
-             Serial.println("**[WPA3 PROTECTION]**");
-             break;
-          default:
-             Serial.println("**[UNKN0WN]**");
-             break;
-      }
+  }
+  else {
+    Serial.printf("𒉭 %d 𒉭networks found.\n" , n);
+    
+    for (int i = 0; i < n; i++){
+      Serial.printf("%d: %s ♱ MAC: %s ♱ AP RSSI: %d ♱ Channel: %d ♱\n",
+                    i + 1,
+                    WiFi.SSID(i).c_str(),
+                    WiFi.BSSIDstr(i).c_str(),
+                    WiFi.RSSI(i),
+                    WiFi.channel(i));
+      
+      uint8_t auth_type= WiFi.encryptionType(i);
+      const char* auth_type_str = (auth_type <= WIFI_AUTH_WPA3_PSK) ? wifi_auth_types[auth_type] : "**[UNKN0WN]**";
+      Serial.println(auth_type_str);
+      
       delay(10);
     }
-  }
-  Serial.println("");
+  } 
+  Serial.println(" ");
   delay(5000);
 }
+
+
