@@ -2,7 +2,7 @@
 ref:// https://github.com/justcallmekoko/ESP32BeaconSpam/blob/master/ESP32BeaconSpam.ino#L15
 
 To do :
-increase beacon output 
+increase beacon output  >> 10 second selay ? lemme remove that and test it 
 give feedback
 
 */
@@ -49,7 +49,7 @@ void broadcastSSID() {
     int result;
     uint8_t channel = random(1, 13); // Declare channel variable
     esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-    delay(10);  // Reduce delay to improve efficiency
+    delay(1);  // initially it was 1 but my dumbass was too worried about oh my eps is gonna get too hot what shall i do
 
     // Randomize Source MAC and BSSID
     for (int i = 0; i < 6; i++) {
