@@ -1,70 +1,85 @@
-/*
-probe scanner
+//simple frame/packet sniffer  [Untested]
 
-doent work after users connect to an ap, need to expand on the packets sniffed
+#include <WiFi.h>  //standard 4 wifi operations
+#include <esp_wifi.h> // Promiscuous mode
 
-*/
+//callback function to handle all the processing
+void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
+  wifi_promiscuous_pkt_t* packet =(wifi_promiscuous_pkt_t*)buf; //gives the packet a packet structure 
+  uint8_t* payload = packet->payload; //allows us to manipulate or view different parts of the packet
+  int rssi = packet->rx_ctrl.rssi; // extract the power signal in packet
 
-#include "WiFi.h"
-#include "esp_wifi.h"
+  Serial.print("RSSI: ");
+  Serial.print(rssi);
+  Serial.print(" | Frame Type: ");
 
-// Callback function to handle received packets
-void snifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
-    if (type == WIFI_PKT_MGMT) { // Only process management packets
-        const wifi_promiscuous_pkt_t* pkt = (wifi_promiscuous_pkt_t*)buf;
-        const uint8_t* payload = pkt->payload;
+  
+  uint8_t frameType = payload[0] & 0xF0; // need better understanding on using & for filtering
+  if (frameType == 0x00){
+    Serial.print("Management | ");
+  }
+  else if (frameType == 0x04 || frameType == 0x05){
+    Serial.print("Control | ");
+  }
+  else if (frameType == 0x08){
+    Serial.print("Data | ");
+  } 
+  else {
+    Serial.print("++Unknown++");
+  }
 
-        // Check if the packet is a Probe Request (subtype 0x40) [need to dive into more packets and see what info i can get from there]
-        if ((payload[0] & 0xF0) == 0x40) {
-            Serial.println("Probe Request Detected!");
+  /*extract MAC (dst) 
+  get bytes from payload[4-9]
+  else the other payload[10-15]
+  */
+  Serial.print(" | Destination Mac: ");
+  for(int i = 4; i<10; i++){
+    Serial.printf("%02X", payload[i]); //%02X makes the hexadecimal format, 02>> hexaformat
+    if(i<9) Serial.print(":");
+  }
+  
+  Serial.print(" | Source Mac: ");
+  for(int i = 10; i<16; i++){
+    Serial.printf("%02X", payload[i]);
+    if (i<15) Serial.print(":");
+  }
+  
+    // Extract SSID (only for Management Frames like Beacons & Probe Requests) the rest we only get macs 
+  if (frameType == 0x00) { 
+      int ssidOffset = 36; // SSID starts at byte 36
+      int ssidLength = payload[ssidOffset]; // First byte at offset gives SSID length
 
-            // Extract and print the source MAC address
-            Serial.print("Source MAC: ");
-            for (int i = 10; i < 16; i++) { // Source MAC starts at byte 10
-                Serial.printf("%02X", payload[i]);
-                if (i < 15) Serial.print(":");
-            }
-            Serial.println();
+      Serial.print(" | SSID: ");
+      if (ssidLength > 0 && ssidLength <= 32) { 
+          for (int i = 0; i < ssidLength; i++) {
+              Serial.print((char)payload[ssidOffset + 1 + i]); 
+          }
+      } 
+      else { 
+          Serial.print("--Hidden--"); 
+      }
+  }
 
-            // Extract and print the SSID if present
-            int ssidLength = payload[25]; // SSID length is at byte 25
-            if (ssidLength > 0 && ssidLength <= 32) { // Valid SSID length
-                Serial.print("Probed SSID: ");
-                for (int i = 0; i < ssidLength; i++) {
-                    Serial.print((char)payload[26 + i]); // SSID starts at byte 26
-                }
-                Serial.println();
-            } else {
-                Serial.println("Probed SSID: [Hidden or Empty]");
-            }
+  Serial.println(); 
+}
+  
+  
+void setup(){
+  Serial.begin(115200);
+  Serial.println("General BigNose sniffing ^ܠ^ ");
 
-            Serial.println("---------------------------------");
-        }
-    }
+  WiFi.mode(WIFI_MODE_STA); //station mode 
+  WiFi.disconnect(); //if connected it will x itself from the network
+  
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_promiscuous_rx_cb(&bigNose);  
 }
 
-void setup() {
-    Serial.begin(115200);
-    Serial.println("Initializing Wi-Fi Sniffer...");
-
-    // Set Wi-Fi mode to station (non-connected)
-    WiFi.mode(WIFI_MODE_STA);
-    WiFi.disconnect();
-
-    // Enable promiscuous mode and set the callback function
-    esp_wifi_set_promiscuous(true);
-    esp_wifi_set_promiscuous_rx_cb(&snifferCallback);
-
-    Serial.println("Wi-Fi Sniffer Started!");
+void loop(){
+  for(int i = 1; i <=13; i++){
+    esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);      
+    Serial.print("Switching to channel:");
+    Serial.println(i);
+    delay(200);
+  }
 }
-
-void loop() {
-    // The main loop does not need to do anything
-    // All processing happens in the snifferCallback
-    delay(1000);
-}
-
-/* to do 
-this only uses probe request, if the client is already connected this wont work. 
->> add other frames for sniffing the mac address, ssid and other information in the packet 
-*/
