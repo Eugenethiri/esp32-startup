@@ -113,6 +113,7 @@ void loop(){
 }
 
 /* without espasync server (cant solve the library issue so we try killing the rat using poison instead)
+//ref: https://github.com/ncdcommunity/ESP32-Captive/blob/master/ESP.ino
 
 #include <WiFi.h>
 #include <WebServer.h>
