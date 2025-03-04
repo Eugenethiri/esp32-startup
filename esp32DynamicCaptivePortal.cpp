@@ -1,27 +1,3 @@
-/* issues:
-no initial connection with any devices
-
-no captive portal
-research https://github.com/nthnn/DynaConfig/blob/main/src/dynaconfig.cpp >> had a whole new library for this 
-Compiling issue ,for more read>>  https://github.com/me-no-dev/ESPAsyncWebServer/issues/464
-might have to use previous libraries
-
-error:
-C:/Users/morar/AppData/Local/Arduino15/packages/esp32/tools/esp-x32/2405/bin/../lib/gcc/xtensa-esp-elf/13.2.0/../../../../xtensa-esp-elf/bin/ld.exe: C:\Users\morar\AppData\Local\arduino\cores\304856845982640bb0ab8356b5381a20\core.a(main.cpp.o):(.literal._Z8loopTaskPv+0xc): undefined reference to `setup()'
-C:/Users/morar/AppData/Local/Arduino15/packages/esp32/tools/esp-x32/2405/bin/../lib/gcc/xtensa-esp-elf/13.2.0/../../../../xtensa-esp-elf/bin/ld.exe: C:\Users\morar\AppData\Local\arduino\cores\304856845982640bb0ab8356b5381a20\core.a(main.cpp.o): in function `loopTask(void*)':
-C:\Users\morar\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.1.3\cores\esp32/main.cpp:56:(.text._Z8loopTaskPv+0x1c): undefined reference to `setup()'
-collect2.exe: error: ld returned 1 exit status
-
-exit status 1
-
-Compilation error: exit status 1
-
- 
-
-this is gonna be annoying :(
-*/
-
-
 //dynamic captive portal
 
 //Define libraries & variables
@@ -135,3 +111,52 @@ void loop(){
       Serial.println("We'll wait for the next client now: ");
     }
 }
+
+/* without espasync server (cant solve the library issue so we try killing the rat using poison instead)
+
+#include <WiFi.h>
+#include <WebServer.h>
+#include <ArduinoJson.h> // 50/50 if i need to include this for my web capture 
+#include  "FS.h"
+#include  "SPIFFS.h"
+
+WebServer server(80);
+StaticJsonBuffer<234> jsonBuffer;
+
+//creds
+const char* ssidAPConfig = "youreC00ked";
+const char* passAPConfig = "12345678";
+
+//leaving this blank untill i make my own, what about yk hiw a page redirects you to another. ill need that now that i think about it there is no need to serve the html here if ill store it in the spiff, or the main page here and the sub other where, nah i prefer the first storing both at spiff. what do yo think gpt?
+const char index_html[] PROGMEM = R"rawliteral( )rawliteral";)
+
+//redirection
+server.onNotFound([]() {
+    server.sendHeader("Location", "http://your-captive-portal.local/", true);
+    server.send(302, "text/plain", "");
+});
+
+//this only serves, do we need to listen? 
+server.on("/", HTTP_GET, []() {
+    File file = SPIFFS.open("/index.html", "r");
+    if (!file) {
+        server.send(404, "text/plain", "File not found");
+        return;
+    }
+    server.streamFile(file, "text/html");
+    file.close();
+});
+
+unfinished because there is no more red bull
+
+void setup(){
+  
+}
+
+void loop(){
+
+}
+ 
+
+
+*/
