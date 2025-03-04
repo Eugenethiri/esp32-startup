@@ -1,12 +1,9 @@
-/*
-to do 
-not getting the request querry to the check up site :(
-  MMH initial captive portal seems to be working just fine what could be the prob
-        1. how the dns handles requests: not getting the transfer of data when the device connects to my esp and tries to reach out to the "web checker" 
-        2. you are just a degenerate :(
-  will spend time tonight after i gain my sanity, and debug, if not ill try the unfinised comment .
+/* i am a degenerate
+to do
+ 1. implement custom html,SPIFF for storing different html pages
+ 2. better the backend to support the html pages
+ 3. oh man going to bed now
 */
-
 //dynamic captive portal
 
 //Define libraries & variables
@@ -67,7 +64,11 @@ void setupServer(){
       request->send_P(200, "text/html", index_html); 
       Serial.println("Client Connected");
   });
-
+  //my dumbass forgot to account for the most important thing in the captive portal, initial request to try rech the internet
+  server.onNotFound([](AsyncWebServerRequest *request){
+      request->send_P(200, "text/html", index_html);
+      Serial.println(" Serving... ( -_•)▄︻デ══━一");
+  });
   //recive and send information
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
       String inputMessage;
@@ -121,52 +122,3 @@ void loop(){
     }
 }
 
-/* without espasync server (cant solve the library issue so we try killing the rat using poison instead)
-//ref: https://github.com/ncdcommunity/ESP32-Captive/blob/master/ESP.ino
-
-#include <WiFi.h>
-#include <WebServer.h>
-#include <ArduinoJson.h> // 50/50 if i need to include this for my web capture 
-#include  "FS.h"
-#include  "SPIFFS.h"
-
-WebServer server(80);
-StaticJsonBuffer<234> jsonBuffer;
-
-//creds
-const char* ssidAPConfig = "youreC00ked";
-const char* passAPConfig = "12345678";
-
-//leaving this blank untill i make my own, what about yk hiw a page redirects you to another. ill need that now that i think about it there is no need to serve the html here if ill store it in the spiff, or the main page here and the sub other where, nah i prefer the first storing both at spiff. what do yo think gpt?
-const char index_html[] PROGMEM = R"rawliteral( )rawliteral";)
-
-//redirection
-server.onNotFound([]() {
-    server.sendHeader("Location", "http://your-captive-portal.local/", true);
-    server.send(302, "text/plain", "");
-});
-
-//this only serves, do we need to listen? 
-server.on("/", HTTP_GET, []() {
-    File file = SPIFFS.open("/index.html", "r");
-    if (!file) {
-        server.send(404, "text/plain", "File not found");
-        return;
-    }
-    server.streamFile(file, "text/html");
-    file.close();
-});
-
-unfinished because there is no more red bull
-
-void setup(){
-  
-}
-
-void loop(){
-
-}
- 
-
-
-*/
