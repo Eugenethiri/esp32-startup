@@ -1,3 +1,12 @@
+/*
+to do 
+not getting the request querry to the check up site :(
+  MMH initial captive portal seems to be working just fine what could be the prob
+        1. how the dns handles requests: not getting the transfer of data when the device connects to my esp and tries to reach out to the "web checker" 
+        2. you are just a degenerate :(
+  will spend time tonight after i gain my sanity, and debug, if not ill try the unfinised comment .
+*/
+
 //dynamic captive portal
 
 //Define libraries & variables
