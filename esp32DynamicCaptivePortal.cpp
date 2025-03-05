@@ -1,8 +1,7 @@
-/* i am a degenerate
+/* still a degenerate
 to do
  1. implement custom html,SPIFF for storing different html pages
  2. better the backend to support the html pages
- 3. oh man going to bed now
 */
 //dynamic captive portal
 
