@@ -1,9 +1,4 @@
-/* still a degenerate
-to do
- 1. implement custom html,SPIFF for storing different html pages
- 2. better the backend to support the html pages
-*/
-//dynamic captive portal
+//Dynamic captive portal
 
 //Define libraries & variables
 #include <DNSServer.h>
@@ -11,7 +6,7 @@ to do
 #include <AsyncTCP.h>
 #include "ESPAsyncWebServer.h"
 
-// server related variables
+// Server related variables
 DNSServer dnsServer;
 AsyncWebServer server(80);
 
@@ -20,7 +15,7 @@ String proficiency;
 bool name_received = false;
 bool proficiency_received = false;
 
-//store the HTML in flash memory instead of ram, y? because its huge & to save RAM
+//Store the HTML in flash memory instead of ram, y? because its huge & to save RAM
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
   <title>Dynamic Captive Portal ;Demo</title>
@@ -42,7 +37,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   </form>
 </body></html>)rawliteral";
 
-//handle requests
+// Handle requests
 class CaptiveRequestHandler : public AsyncWebHandler {
 public:
   CaptiveRequestHandler() {}
