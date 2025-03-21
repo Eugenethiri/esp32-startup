@@ -1,0 +1,1 @@
+S1mple implementation for evil portal attack using the arduino IDE, by itsself is harmless, implementation of a deauth attack to force people into your own EVIL AP 4 credential harvesting is where the magic truly happens.
