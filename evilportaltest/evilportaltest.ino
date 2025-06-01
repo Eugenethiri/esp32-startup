@@ -1,4 +1,7 @@
-  /* ˗ˏˋ 𒉭  Dynamic captive portal  𒉭 ˊˎ˗   
+  /* ˗ˏˋ 𒉭  Dynamic captive portal  𒉭 ˊˎ˗  
+  to do :
+  1. add dynamic ssid change idk how.
+  2. read more comics 
      */
 
 //Define libraries & variables
@@ -115,7 +118,7 @@ void setup(){
   // AP set up & dns
   Serial.println("Setting up AP Mode");
   WiFi.mode(WIFI_AP); 
-  WiFi.softAP("youreCook3d2", "12345678");
+  WiFi.softAP("Succubus");
   Serial.print("AP IP address: ");Serial.println(WiFi.softAPIP());
   Serial.println("Setting up Async WebServer");
   setupServer();
