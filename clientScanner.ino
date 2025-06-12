@@ -16,13 +16,13 @@ void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
   
   uint8_t frameType = payload[0] & 0xF0; // need better understanding on using & for filtering
   if (frameType == 0x00){
-    Serial.print("Management | ");
+    Serial.print("Management| ");
   }
   else if (frameType == 0x04 || frameType == 0x05){
-    Serial.print("Control | ");
+    Serial.print("Control| ");
   }
   else if (frameType == 0x08){
-    Serial.print("Data | ");
+    Serial.print("Data| ");
   } 
   else {
     Serial.print("++Unknown++");
@@ -78,7 +78,7 @@ void setup(){
 void loop(){
   for(int i = 1; i <=13; i++){
     esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);      
-    Serial.print("Switching to channel:");
+    Serial.print("CH:");
     Serial.println(i);
     delay(200);
   }
