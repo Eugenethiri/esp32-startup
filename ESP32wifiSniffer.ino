@@ -1,4 +1,10 @@
-//simple frame/packet sniffer  [Untested]
+//simple frame/packet sniffer  
+/* to do 
+1.)fit all information sparingly
+2.)fix the hidden ssid part
+3.) timer?
+
+*/
 
 #include <WiFi.h>  //standard 4 wifi operations
 #include <esp_wifi.h> // Promiscuous mode
