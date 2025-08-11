@@ -167,7 +167,7 @@ void setup() {
   Serial.begin(115200);
   //say hi
   Serial.println("Hello,User! 🗡 🗡 🗡 🗡 🗡");
-  Serial.println("⛧° 。 ⋆༺♱༻⋆ 。°⛧")
+  Serial.println("⛧° 。 ⋆༺♱༻⋆ 。°⛧");
   //change WiFi mode
   WiFi.mode(WIFI_MODE_STA);
 
