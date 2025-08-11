@@ -1,3 +1,4 @@
+// lol review jcmkk work and find out why the spam doesnt work on my laptop
 #include "WiFi.h"
 
 extern "C"{
@@ -168,6 +169,7 @@ void setup() {
   //say hi
   Serial.println("Hello,User! 🗡 🗡 🗡 🗡 🗡");
   Serial.println("⛧° 。 ⋆༺♱༻⋆ 。°⛧");
+  Serial.println("starting up :D");
   //change WiFi mode
   WiFi.mode(WIFI_MODE_STA);
 
