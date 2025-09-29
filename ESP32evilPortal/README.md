@@ -1,1 +1,2 @@
-S1mple implementation for evil portal attack using the arduino IDE and esp32 spiffs to store html, by its self its harmless, but implementationed with a deauth attack to redirect people into your own EVIL AP 4 credential harvesting is where the magic truly happens.
+S1mple implementation for evil portal attack using the arduino IDE and esp32 little to store html, by its self its harmless, but implementationed with a deauth flood attack to redirect clients into your own EVIL AP 4 credential harvesting is where the magic truly happens.
+See images for schematics
