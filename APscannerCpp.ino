@@ -5,7 +5,7 @@
 const char* wifi_auth_types[] = {
 
       "[0PEN]",
-      "[WEP] ULTRA W3AK",
+      "[WEP] V-W3AK",
       "[WPA]",
       "[WPA2]",
       "[WPA/WPA2]",
@@ -36,7 +36,7 @@ void loop() {
     
     for (int i = 0; i < n; i++){
       uint8_t auth_type= WiFi.encryptionType(i);
-      const char* auth_type_str = (auth_type <= WIFI_AUTH_WPA3_PSK) ? wifi_auth_types[auth_type] : "**[UNKN0WN]**";
+      const char* auth_type_str = (auth_type <= WIFI_AUTH_WPA3_PSK) ? wifi_auth_types[auth_type] : "[UNKN0WN]";
 
       Serial.printf("%d: %s ♱MAC: %s ♱RSSI: %d ♱CH: %d ♱Auth: %s ♱ \n",
                     i + 1,

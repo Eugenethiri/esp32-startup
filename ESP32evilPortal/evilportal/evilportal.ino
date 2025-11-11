@@ -34,7 +34,6 @@ public:
   }
 };
 
-// should change it to Domain name server
 void setupServer() {
   // Handle unknown requests (default to index.html for captive portal)
   server.onNotFound([](AsyncWebServerRequest *request){
