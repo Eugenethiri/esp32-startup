@@ -146,20 +146,28 @@ void loop() {
 
 /*for deauthentication 
 ref
-// --- DEAUTH handling: parse reason code from payload if present ---
-if (type_field == 0 && subtype == 12) { // Deauthentication (Mgmt subtype 12)
-  // compute header length (this minimal header layout is 24 bytes)
-  const size_t header_len = sizeof(ieee80211_mac_hdr_t); // typically 24
-  int payload_len = sig_len - header_len;
-  if (payload_len >= 2) {
-    uint8_t* body = raw + header_len; // start of frame body
-    // reason is 2 bytes (little-endian)
-    uint16_t reason = (uint16_t)body[0] | ((uint16_t)body[1] << 8);
-    Serial.printf("  DEAUTH reason: %u\n", reason);
+ DEAUTH handling: 
 
-    // Optional: act on certain reason codes (example numeric checks)
-    if (reason == 1) {
-      Serial.println("   -> Reason 1: Unspecified (common)");
-    }
+Reason-code rule
+
+Condition: is_deauth && reason_code == 1 (unspecified) and count from same src_mac > N1 within window W1 → suspicious.
+
+Evidence: timestamps, dst_mac list, sample packets.
+
+Deauth flood rule
+
+Condition: total deauths observed on network > N2 within W2 OR unique targets > M2 within W2 → flood.
+
+Evidence: count per-second, unique dest count.
+
+Source amplification / multi-channel rule
+
+Condition: same src_mac seen sending deauths on different channels in short time → spoofing or fast channel hop attack.
+
+3 deauths from same source to same target in 10s
+
+N2 = 10 deauths total in 5s
+
+M2 = 5 unique destinations in 5s
 
 */

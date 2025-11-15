@@ -27,7 +27,7 @@ typedef struct {
 
 //callback function to handle all the processing
 void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
-  wifi_promiscuous_pkt_t* packet =(wifi_promiscuous_pkt_t*)buf; //pointer storing packet fields
+  wifi_promiscuous_pkt_t* packet =(wifi_promiscuous_pkt_t*)buf; 
 
   if(!packet) return; // error checker if not null
   uint8_t* raw_payload = packet->payload; // parase contents as it is
@@ -62,7 +62,7 @@ void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
     typeStr = "RSVD"; 
     break;
   }
-  String subtypeStr = String(subtype); // fallback to numeric string
+  String subtypeStr = String(subtype); 
   if (type_field == 0) { // Management frame
     switch (subtype) {
       case 0:  subtypeStr = "Assoc Req";  break;
@@ -79,7 +79,6 @@ void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
     }
   }
  
-
   Serial.printf("[CH %02d] RSSI: %d dBm | Type: %s Subtype: %s | toDS:%d fromDS:%d\n",
               chan, rssi, typeStr, subtypeStr.c_str(), toDS, fromDS);
 
