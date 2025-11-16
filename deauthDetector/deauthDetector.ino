@@ -1,11 +1,14 @@
 /*
 Deauth sniffer & detector  
- 
 
 */
 
 #include <WiFi.h>
 #include <esp_wifi.h>
+
+//Custom headers for tracking packets
+#include <set> 
+#include <map>
 
 //String2MAC
 String macToStr(const uint8_t *mac){
@@ -25,6 +28,8 @@ typedef struct {
   uint16_t seq_ctrl;
 } __attribute__((packed)) ieee80211_mac_hdr_t;
 
+// deauth frame
+
 typedef struct {
   uint16_t reason_code;
 } __attribute__((packed)) wifi_ieee80211_deauth_t;
@@ -33,6 +38,48 @@ typedef struct {
   ieee80211_mac_hdr_t header;
   wifi_ieee80211_deauth_t deauth;
 } __attribute__((packed)) wifi_ieee80211_deauth_frame_t;
+
+// Deauth tracking
+struct DeauthSrcInfo {
+  int count = 0;
+  unsigned long lastSeen = 0;
+  std::set<String> victims; //unique clients hit
+};
+
+std::map<String, DeauthSrcInfo> attackerDB;
+
+
+// Evil twin setting
+
+std::map<String, std::set<int>> bssidChannels; // BSSID -> channels seen
+
+void checkEvilTwin(String bssid, int channel) {
+  if (bssidChannels.count(bssid) == 0){ 
+    bssidChannels[bssid].insert(channel); 
+    return;
+  }
+
+  auto &channelsSeen = bssidChannels[bssid];
+
+    if(channelsSeen.find(channel) == channelsSeen.end()){ //track and stop when duplicate ssid operate on the same channel
+
+    Serial.println("\n Possible Evil Twin Detected!");
+    Serial.print("BSSID: "); Serial.println(bssid);
+
+    Serial.println("Previously seen on channels: ");
+    for (int ch : channelsSeen) {
+      Serial.print(ch);
+      Serial.print(" ");
+    }
+
+    Serial.print("\nNow also seen on: ");
+    Serial.println(channel);
+    Serial.print(" ");
+
+
+      channelsSeen.insert(channel);
+  }
+}
 
 //callback function to handle all the processing
 void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
@@ -49,35 +96,57 @@ void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
   if (len < sizeof(wifi_ieee80211_deauth_frame_t)) return;
 
   ieee80211_mac_hdr_t* hdr = (ieee80211_mac_hdr_t*) raw_payload;
+  
+  // Extract bssid  for EvilTwin detection
+  String bssid = macToStr(hdr->addr3);
+
+  checkEvilTwin(bssid, chan);
+  
 
   // extract frame  control fields focusing on deauthentication 
   uint16_t fc = hdr->frame_ctrl;
   uint8_t subtype = (fc >> 4) & 0xF;
 
-  if (subtype == 12) { // If deauth
+
+  // Frame control 
+  if (subtype == 12) { //  0nly deauth frames
+
+    String src = macToStr(hdr->addr2);
+    String dst = macToStr(hdr->addr1);
+
+    unsigned long now = millis();
+
+    DeauthSrcInfo &info = attackerDB[src];
+
+  
+    info.count++;
+    info.lastSeen = now;
+    if (dst != "FF:FF:FF:FF:FF:FF" ) info.victims.insert(dst);
 
     wifi_ieee80211_deauth_frame_t* f = (wifi_ieee80211_deauth_frame_t*) raw_payload;
     uint16_t reasonCode = (f->deauth.reason_code);
 
+    //Codes 1 & 0  being just unreasonable and obvious
+    if (reasonCode == 0 || reasonCode == 1){
+      Serial.println("\n Suspicious deauth reason(0/1) code:");
+      Serial.print(reasonCode);
+    }
 
-    Serial.println();
-    Serial.println("🔥 DEAUTH FRAME DETECTED");
-    Serial.print("RSSI: "); Serial.println(packet->rx_ctrl.rssi);
-    Serial.print("Channel: "); Serial.println(packet->rx_ctrl.channel);
-    Serial.print("From: "); Serial.println(macToStr(hdr->addr2));
-    Serial.print("To: "); Serial.println(macToStr(hdr->addr1));
-    Serial.print("Reason Code: "); Serial.println(reasonCode);
+    //Detect deauth flood
+    // Detection logic
+    if (info.count > 20 || info.victims.size() > 5) {
+      Serial.println("\n DEAUTH FLOOD DETECTED!");
+      Serial.print("spoofed attacker: "); Serial.println(src);
+      Serial.print("Frames: "); Serial.println(info.count);
+      Serial.print("RSSI: "); Serial.println(packet->rx_ctrl.rssi);
+      Serial.print("Unique victims: "); Serial.println(info.victims.size());
 
-    Serial.print("Raw bytes: ");
-    for (int i = 0; i < 40; i++) {
-      Serial.printf("%02X ", raw_payload[i]);
+      Serial.print("\n Victim list: ");
+      for(const auto &v : info.victims) {
+        Serial.print(" - ");
+        Serial.println(v);
       }
-    Serial.println();
-
-    /*  
-    better logic
-    if (reasonCode == 0 ) 
-    */
+    }
   } 
 }
   
@@ -98,6 +167,6 @@ void loop(){
     esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);      
     Serial.print("CH:");
     Serial.println(i);
-    delay(500);
+    delay(750);
   }
 }
