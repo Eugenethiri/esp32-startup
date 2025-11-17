@@ -18,6 +18,7 @@ String macToStr(const uint8_t *mac){
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   return String(buf);
 }
+//               ===Deauthentication+++
 
 //Frame header information
 typedef struct {
@@ -49,9 +50,45 @@ struct DeauthSrcInfo {
 
 std::map<String, DeauthSrcInfo> attackerDB;
 
+void checkDeauthentication(const String &src,const String &dst, uint8_t *raw_payload, wifi_promiscuous_pkt_t *packet ){
+
+  unsigned long now = millis();
+
+  DeauthSrcInfo &info = attackerDB[src];
+
+  
+  info.count++;
+  info.lastSeen = now;
+  if (dst != "FF:FF:FF:FF:FF:FF" ) info.victims.insert(dst);
+
+  wifi_ieee80211_deauth_frame_t* f = (wifi_ieee80211_deauth_frame_t*) raw_payload;
+  uint16_t reasonCode = (f->deauth.reason_code);
+
+    //Codes 1 & 0  being just unreasonable and obvious
+  if (reasonCode == 0 || reasonCode == 1){
+    Serial.println("\n Suspicious deauth reason(0/1) code:");
+    Serial.print(reasonCode);
+  }
+
+//      Detect deauth flood  Detection logic
+  if (info.count > 20 || info.victims.size() > 5) {
+    Serial.println("\n DEAUTH FLOOD DETECTED!");
+    Serial.print("spoofed attacker: "); Serial.println(src);
+    Serial.print("Frames: "); Serial.println(info.count);
+    Serial.print("RSSI: "); Serial.println(packet->rx_ctrl.rssi);
+    Serial.print("Unique victims: "); Serial.println(info.victims.size());
+
+    Serial.print("\n Victim list: ");
+    for(const auto &v : info.victims) {
+      Serial.print(" - ");
+      Serial.println(v);
+    }
+  }
+}
 
 
-// ###Evil twin setting###
+
+//       ###Evil Twin ###
 
 struct apRecord {
     String ssid;
@@ -65,52 +102,50 @@ std::vector<apRecord> apList;
 
 void checkEvilTwin(String ssid, String bssid, int channel, int rssi) {
 
-    if (bssid == "FF:FF:FF:FF:FF:FF") return;
+  if (bssid == "FF:FF:FF:FF:FF:FF") return;
 
-    // Loop known APs
-    for (auto &ap : apList) {
-
+  // Loop known APs
+  for (auto &ap : apList) {
         // SSID match but another BSSID
-        if (ap.ssid == ssid && ap.bssid != bssid) {
+    if (ap.ssid == ssid && ap.bssid != bssid) {
+      int chDiff = abs(ap.channel - channel);
+      int rssiDiff = abs(ap.rssi - rssi);
 
-            int chDiff = abs(ap.channel - channel);
-            int rssiDiff = abs(ap.rssi - rssi);
+      bool badChannel = (chDiff > 2);      // Prevent channel bleed false alarms
+      bool badSignal  = (rssiDiff > 25);   // Huge difference = different AP
 
-            bool badChannel = (chDiff > 2);      // Prevent channel bleed false alarms
-            bool badSignal  = (rssiDiff > 25);   // Huge difference = different AP
+      if (badChannel || badSignal) {
+        Serial.println("\n=== POSSIBLE EVIL TWIN DETECTED ===");
+        Serial.println("SSID: " + ssid);
 
-            if (badChannel || badSignal) {
+        Serial.print("Legit BSSID: ");
+        Serial.print(ap.bssid);
+        Serial.print("  CH:");
+        Serial.print(ap.channel);
+        Serial.print("  RSSI:");
+        Serial.println(ap.rssi);
 
-                Serial.println("\n=== POSSIBLE EVIL TWIN DETECTED ===");
-                Serial.println("SSID: " + ssid);
+        Serial.print("Clone BSSID: ");
+        Serial.print(bssid);
+        Serial.print("  CH:");
+        Serial.print(channel);
+        Serial.print("  RSSI:");
+        Serial.println(rssi);
 
-                Serial.print("Legit BSSID: ");
-                Serial.print(ap.bssid);
-                Serial.print("  CH:");
-                Serial.print(ap.channel);
-                Serial.print("  RSSI:");
-                Serial.println(ap.rssi);
+        if (badChannel) Serial.println("Reason: Channel mismatch (beyond bleed)");
+        if (badSignal)  Serial.println("Reason: Strong RSSI inconsistency");
 
-                Serial.print("Clone BSSID: ");
-                Serial.print(bssid);
-                Serial.print("  CH:");
-                Serial.print(channel);
-                Serial.print("  RSSI:");
-                Serial.println(rssi);
-
-                if (badChannel) Serial.println("Reason: Channel mismatch (beyond bleed)");
-                if (badSignal)  Serial.println("Reason: Strong RSSI inconsistency");
-
-            }
-
-            return;
-        }
+      }
+      return;
     }
 
     // New AP → record it
     apRecord r = { ssid, bssid, channel, rssi, millis() };
     apList.push_back(r);
+  }
 }
+
+//      Sniffer 
 
 void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
 
@@ -142,41 +177,8 @@ void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
 
   // Frame control 
   if (subtype == 12) { //  0nly deauth frames (gonna make this a function for checking deauth attacks. much cleaner work)
-   
-    unsigned long now = millis();
-
-    DeauthSrcInfo &info = attackerDB[src];
-
-  
-    info.count++;
-    info.lastSeen = now;
-    if (dst != "FF:FF:FF:FF:FF:FF" ) info.victims.insert(dst);
-
-    wifi_ieee80211_deauth_frame_t* f = (wifi_ieee80211_deauth_frame_t*) raw_payload;
-    uint16_t reasonCode = (f->deauth.reason_code);
-
-    //Codes 1 & 0  being just unreasonable and obvious
-    if (reasonCode == 0 || reasonCode == 1){
-      Serial.println("\n Suspicious deauth reason(0/1) code:");
-      Serial.print(reasonCode);
-    }
-
-    //Detect deauth flood
-    // Detection logic
-    if (info.count > 20 || info.victims.size() > 5) {
-      Serial.println("\n DEAUTH FLOOD DETECTED!");
-      Serial.print("spoofed attacker: "); Serial.println(src);
-      Serial.print("Frames: "); Serial.println(info.count);
-      Serial.print("RSSI: "); Serial.println(packet->rx_ctrl.rssi);
-      Serial.print("Unique victims: "); Serial.println(info.victims.size());
-
-      Serial.print("\n Victim list: ");
-      for(const auto &v : info.victims) {
-        Serial.print(" - ");
-        Serial.println(v);
-      }
-    }
-  } 
+    checkDeauthentication(src, dst, raw_payload, packet);
+  }
 }
   
 void setup(){
