@@ -1,10 +1,11 @@
 /*
 Deauth sniffer & detector  
-
 */
 
 #include <WiFi.h>
 #include <esp_wifi.h>
+
+#include <vector>
 
 //Custom headers for tracking packets
 #include <set> 
@@ -18,7 +19,7 @@ String macToStr(const uint8_t *mac){
   return String(buf);
 }
 
-//Define header information
+//Frame header information
 typedef struct {
   uint16_t frame_ctrl; //type 0f frame
   uint16_t duration_id;
@@ -28,8 +29,8 @@ typedef struct {
   uint16_t seq_ctrl;
 } __attribute__((packed)) ieee80211_mac_hdr_t;
 
-// deauth frame
 
+// Full deauth frame (header + payload(rc))
 typedef struct {
   uint16_t reason_code;
 } __attribute__((packed)) wifi_ieee80211_deauth_t;
@@ -49,39 +50,68 @@ struct DeauthSrcInfo {
 std::map<String, DeauthSrcInfo> attackerDB;
 
 
-// Evil twin setting
 
-std::map<String, std::set<int>> bssidChannels; // BSSID -> channels seen
+// ###Evil twin setting###
 
-void checkEvilTwin(String bssid, int channel) {
-  if (bssidChannels.count(bssid) == 0){ 
-    bssidChannels[bssid].insert(channel); 
-    return;
-  }
+struct apRecord {
+    String ssid;
+    String bssid;
+    int channel;
+    int rssi;
+    unsigned long lastSeen;
+};
 
-  auto &channelsSeen = bssidChannels[bssid];
+std::vector<apRecord> apList;
 
-    if(channelsSeen.find(channel) == channelsSeen.end()){ //track and stop when duplicate ssid operate on the same channel
+void checkEvilTwin(String ssid, String bssid, int channel, int rssi) {
 
-    Serial.println("\n Possible Evil Twin Detected!");
-    Serial.print("BSSID: "); Serial.println(bssid);
+    if (bssid == "FF:FF:FF:FF:FF:FF") return;
 
-    Serial.println("Previously seen on channels: ");
-    for (int ch : channelsSeen) {
-      Serial.print(ch);
-      Serial.print(" ");
+    // Loop known APs
+    for (auto &ap : apList) {
+
+        // SSID match but another BSSID
+        if (ap.ssid == ssid && ap.bssid != bssid) {
+
+            int chDiff = abs(ap.channel - channel);
+            int rssiDiff = abs(ap.rssi - rssi);
+
+            bool badChannel = (chDiff > 2);      // Prevent channel bleed false alarms
+            bool badSignal  = (rssiDiff > 25);   // Huge difference = different AP
+
+            if (badChannel || badSignal) {
+
+                Serial.println("\n=== POSSIBLE EVIL TWIN DETECTED ===");
+                Serial.println("SSID: " + ssid);
+
+                Serial.print("Legit BSSID: ");
+                Serial.print(ap.bssid);
+                Serial.print("  CH:");
+                Serial.print(ap.channel);
+                Serial.print("  RSSI:");
+                Serial.println(ap.rssi);
+
+                Serial.print("Clone BSSID: ");
+                Serial.print(bssid);
+                Serial.print("  CH:");
+                Serial.print(channel);
+                Serial.print("  RSSI:");
+                Serial.println(rssi);
+
+                if (badChannel) Serial.println("Reason: Channel mismatch (beyond bleed)");
+                if (badSignal)  Serial.println("Reason: Strong RSSI inconsistency");
+
+            }
+
+            return;
+        }
     }
 
-    Serial.print("\nNow also seen on: ");
-    Serial.println(channel);
-    Serial.print(" ");
-
-
-      channelsSeen.insert(channel);
-  }
+    // New AP → record it
+    apRecord r = { ssid, bssid, channel, rssi, millis() };
+    apList.push_back(r);
 }
 
-//callback function to handle all the processing
 void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
 
   if (type != WIFI_PKT_MGMT) return; 
@@ -99,21 +129,20 @@ void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
   
   // Extract bssid  for EvilTwin detection
   String bssid = macToStr(hdr->addr3);
-
-  checkEvilTwin(bssid, chan);
-  
+  String src = macToStr(hdr->addr2);
+  String dst = macToStr(hdr->addr1);
 
   // extract frame  control fields focusing on deauthentication 
   uint16_t fc = hdr->frame_ctrl;
   uint8_t subtype = (fc >> 4) & 0xF;
 
+  if (subtype == 8){ //Beacon Frame
+    checkEvilTwin(src, bssid, chan, rssi);
+  }
 
   // Frame control 
-  if (subtype == 12) { //  0nly deauth frames
-
-    String src = macToStr(hdr->addr2);
-    String dst = macToStr(hdr->addr1);
-
+  if (subtype == 12) { //  0nly deauth frames (gonna make this a function for checking deauth attacks. much cleaner work)
+   
     unsigned long now = millis();
 
     DeauthSrcInfo &info = attackerDB[src];
