@@ -1,12 +1,15 @@
 // ESP32 Sour Apple by RapierXbox
-/*2DO
-> Reverse engineer
-*/
 
 
 #include <NimBLEDevice.h>
 
 NimBLEAdvertising *pAdvertising;
+
+void randomAdvertisementData(uint8_t* buf, size_t len) {
+  for(size_t i = 0; i < len; i++) {
+    buf[i] = random(0, 1000);
+  }
+}
 
 void setup() {
   NimBLEDevice::init("");

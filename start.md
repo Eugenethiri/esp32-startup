@@ -1,3 +1,5 @@
+Each folder in this repo contains a .ino that performs a straight forwad task (i.e set up a webserver ). I use this a a quick start up point when i develop any ESP related task. 
+
 # After purchase setup:
 * Arduino IDE, go to File> Preferences ... Enter the following into the “Additional Board Manager URLs” field:
     https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json

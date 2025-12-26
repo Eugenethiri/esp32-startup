@@ -1,5 +1,5 @@
 /*
-Deauth sniffer & detector  
+Deauth & evil twin detector  
 */
 
 #include <WiFi.h>
@@ -18,8 +18,8 @@ String macToStr(const uint8_t *mac){
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   return String(buf);
 }
-//               ===Deauthentication+++
 
+//               ===Deauthentication+++
 //Frame header information
 typedef struct {
   uint16_t frame_ctrl; //type 0f frame
@@ -87,9 +87,7 @@ void checkDeauthentication(const String &src,const String &dst, uint8_t *raw_pay
 }
 
 
-
 //       ###Evil Twin ###
-
 struct apRecord {
     String ssid;
     String bssid;
@@ -146,7 +144,6 @@ void checkEvilTwin(String ssid, String bssid, int channel, int rssi) {
 }
 
 //      Sniffer 
-
 void bigNose(void* buf, wifi_promiscuous_pkt_type_t  type){
 
   if (type != WIFI_PKT_MGMT) return; 

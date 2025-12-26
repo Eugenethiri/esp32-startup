@@ -117,7 +117,7 @@ void setup(){
   // AP set up & dns
   Serial.println("Setting up AP Mode");
   WiFi.mode(WIFI_AP); 
-  WiFi.softAP("Succubus");
+  WiFi.softAP("KAIMBA");
   Serial.print("AP IP address: ");Serial.println(WiFi.softAPIP());
   Serial.println("Setting up Async WebServer");
   setupServer();

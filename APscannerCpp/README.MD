@@ -1,0 +1,1 @@
+Simple access point scanner, outputting its metadata(encryption type, channel etc)
